@@ -13,7 +13,7 @@ class NaiveBayesTextClassifier():
         self.class_prob= [] #dict to store class probabilities
         self.num_class= [] #dict to store class number
         self.num_feat= [] # dict to store feature number
-        self.alpha = 0.05
+        self.alpha = 1
 
     def train(self,X,y):
         each_class_count = {} # list for counting each class
@@ -47,21 +47,21 @@ class NaiveBayesTextClassifier():
         # print feature_count[0]
 
         # Calculate class and feature probablities per each class
-        for cls in feature_count:
-            num = (self.alpha+each_class_count[cls])
+        for aclass in feature_count:
+            num = (self.alpha+each_class_count[aclass])
             din = (y.size+(self.num_class[0]*self.alpha))
             self.class_prob.append((num/float(din)))
             temp_ar = np.array([])
             for j in  range(X[i].size):
-                num= (feature_count[cls][j] + self.alpha)
-                din = (each_class_count[cls]+(2*self.alpha))
+                num= (feature_count[aclass][j] + self.alpha)
+                din = (each_class_count[aclass]+(2*self.alpha))
                 temp_ar=np.append(temp_ar,(num/float(din)))
             self.feat_prob.append(temp_ar)
 
 
-        print self.class_prob[0]
-        print("\n")
-        print len(self.feat_prob[0])
+        # print self.class_prob[0]
+        # print("\n")
+        # print len(self.feat_prob[0])
 
     def predict(self, X):
         print ("Predicting Naive bayes....!!!!")
@@ -71,16 +71,16 @@ class NaiveBayesTextClassifier():
             minimum_neg_log_prob=999999999999999
             category = 0
 
-            for cls in range(self.num_class[0]):
-                neg_log_prob = -log(self.class_prob[cls])
+            for aclass in range(self.num_class[0]):
+                neg_log_prob = -log(self.class_prob[aclass])
                 for j in  range(self.num_feat[0]):
                     if (i[j])==0:
-                        neg_log_prob -= log(1-self.feat_prob[cls][j])
+                        neg_log_prob -= log(1-self.feat_prob[aclass][j])
                     else:
-                        neg_log_prob -= log(self.feat_prob[cls][j])
+                        neg_log_prob -= log(self.feat_prob[aclass][j])
 
                 if minimum_neg_log_prob>neg_log_prob:
-                    category=cls
+                    category=aclass
                     minimum_neg_log_prob=neg_log_prob
 
             Y_predict=np.append(Y_predict,category)
@@ -99,7 +99,7 @@ y_train, y_test = newsgroups_train.target, newsgroups_test.target
 #pprint(list(newsgroups_train.target_names))
 #print (newsgroups_train.filenames)
 #sprint (newsgroups_train.target)
-no_features = 1000
+no_features = 5000
 vectorizer = TfidfVectorizer(stop_words='english', binary=True, max_features = no_features)#, analyzer='char', ngram_range=(1,3))
 X_train = vectorizer.fit_transform(newsgroups_train.data).toarray()
 #print (X_train.shape)
@@ -111,6 +111,6 @@ feature_names = vectorizer.get_feature_names() # here list of different words us
 classsifier = NaiveBayesTextClassifier()
 classsifier.train(X_train,y_train)
 y_pred = classsifier.predict(X_test)
-print type(y_pred)
-print type(y_test)
-print ("accuracy: %f"%(np.mean((y_test-y_pred)==0)))
+    # print type(y_pred)
+    # print type(y_test)
+print ("accuracy: %f"%(np.mean((y_test-y_pred)==0))*100)
